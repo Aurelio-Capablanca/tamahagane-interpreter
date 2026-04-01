@@ -1,16 +1,18 @@
 #[derive(Debug, PartialEq)]
-pub struct Response {
+pub struct Results {
     numeric: f64,
     boolean: bool,
     string: String,
+    error: Option<String>,
 }
 
-impl Response {
+impl Results{
     pub fn new() -> Self {
         Self {
             numeric: 0.0,
             boolean: false,
             string: "0".to_string(),
+            error: None
         }
     }
 

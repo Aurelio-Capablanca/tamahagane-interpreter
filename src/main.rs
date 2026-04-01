@@ -28,14 +28,14 @@ mod model;
  */
  
  
-fn main() {
-    
+fn main() {    
     //call to init console
     let mut lines = String::new();
     loop {
         println!("hearing ....");        
         std::io::stdin().read_line(&mut lines).unwrap_or(0_usize);
         println!("passed in ! {:?}",lines);
+        //
         lines = String::new();        
         println!("Do you want to continue? [Y/n]");
         std::io::stdin().read_line(&mut lines).unwrap_or(0_usize);
