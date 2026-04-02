@@ -5,7 +5,7 @@ pub enum Value {
     Number(f64, i64),
     Boolean(bool),
     Hex(String, i64),
-    Symbol(String),
+    Symbol(String, f64/* power! */),
     Vector(Vec<Value>),
     Matrix(Vec<Vec<Value>>),    
     NoValue
