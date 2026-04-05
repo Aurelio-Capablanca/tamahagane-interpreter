@@ -10,6 +10,7 @@ pub mod token {
 
         //non-identified!
         NoFeature,
+        AllocIdentifier,
 
         //keywords
         Lambda,
@@ -30,6 +31,9 @@ pub mod token {
         GreaterEq,   //>=
         ReverseBool, // !
         ReverseEq,   // !=
+        And,         //&& | and
+        Or,          // || | or
+        Not,         // ! | not
 
         // Delimitations
         LParen,    //(
@@ -41,8 +45,7 @@ pub mod token {
         Semicolon, //;
 
         //own usage at Tamahagane!
-        Apostrohe, // ' -- For Base declaration
-
+        Apostrohe, // ' -- For Base declaration        
         //end for file
         EOF,
     }
@@ -56,6 +59,9 @@ pub mod token {
 }
 
 pub mod lex_analisys {
+    use std::thread::current;
+
+    use crate::ast::lexer::token::{Token, TokenType};
 
     pub struct Lexer<'a> {
         input: &'a [u8],
@@ -100,7 +106,7 @@ pub mod lex_analisys {
             self.pos += n.min(self.input.iter().len() - self.pos);
         }
 
-        fn slice(&self, start_point: usize, end_point: usize) -> &'a str {
+        fn get_slice(&self, start_point: usize, end_point: usize) -> &'a str {
             unsafe { std::str::from_utf8_unchecked(&self.input[start_point..end_point]) }
         }
 
@@ -116,7 +122,7 @@ pub mod lex_analisys {
                     break;
                 }
             }
-            self.slice(start, self.pos)
+            self.get_slice(start, self.pos)
         }
 
         pub fn skip_non_valid(&mut self) {
@@ -130,6 +136,264 @@ pub mod lex_analisys {
                     break;
                 }
             }
+        }
+
+        // state keywords
+        fn is_keyword(sub: &str) -> Option<TokenType> {
+            match sub {
+                "alloc" | "allc" => Some(TokenType::Alloc),
+                "fn" => Some(TokenType::Fn),
+                "lbmd" | "(&)" => Some(TokenType::Lambda),
+                "true" | "True" => Some(TokenType::True),
+                "false" | "False" => Some(TokenType::False),
+                "and" => Some(TokenType::And),
+                "not" => Some(TokenType::Not),
+                "or" => Some(TokenType::Or),
+                _ => None,
+            }
+        }
+
+        //-------- peek at tokens --------
+        pub fn peek_tokens(&mut self) -> Token {
+            self.skip_non_valid();
+
+            let line = self.line;
+            let column = self.column;
+
+            match self.current() {
+                None => Token {
+                    type_token: TokenType::EOF,
+                    lexeme: String::new(),
+                    line: line,
+                    column: column,
+                },
+                Some(b'(') => {
+                    self.advance();
+                    Token {
+                        type_token: TokenType::LParen,
+                        lexeme: "(".to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(b')') => {
+                    self.advance();
+                    Token {
+                        type_token: TokenType::RParen,
+                        lexeme: ")".to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(b'}') => {
+                    self.advance();
+                    Token {
+                        type_token: TokenType::RCBracket,
+                        lexeme: "}".to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(b'{') => {
+                    self.advance();
+                    Token {
+                        type_token: TokenType::LCBracket,
+                        lexeme: "{".to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(b'[') => {
+                    self.advance();
+                    Token {
+                        type_token: TokenType::LBracket,
+                        lexeme: "[".to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(b']') => {
+                    self.advance();
+                    Token {
+                        type_token: TokenType::RBracket,
+                        lexeme: "]".to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(b';') => {
+                    self.advance();
+                    Token {
+                        type_token: TokenType::Semicolon,
+                        lexeme: ";".to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(b'+') => {
+                    self.advance();
+                    Token {
+                        type_token: TokenType::Plus,
+                        lexeme: "+".to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(b'-') => {
+                    self.advance();
+                    Token {
+                        type_token: TokenType::Minus,
+                        lexeme: "-".to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(b'*') => {
+                    self.advance();
+                    Token {
+                        type_token: TokenType::Star,
+                        lexeme: "*".to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(b'^') => {
+                    self.advance();
+                    Token {
+                        type_token: TokenType::Caret,
+                        lexeme: "^".to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(b'=') => {
+                    self.advance();
+                    if self.current() == Some(b'=') {
+                        Token {
+                            type_token: TokenType::EqEqs,
+                            lexeme: "==".to_string(),
+                            line,
+                            column,
+                        }
+                    } else {
+                        Token {
+                            type_token: TokenType::Eqs,
+                            lexeme: "=".to_string(),
+                            line,
+                            column,
+                        }
+                    }
+                }
+                Some(b'<') => {
+                    self.advance();
+                    if self.current() == Some(b'=') {
+                        Token {
+                            type_token: TokenType::LesserEq,
+                            lexeme: "<=".to_string(),
+                            line,
+                            column,
+                        }
+                    } else {
+                        Token {
+                            type_token: TokenType::Lesser,
+                            lexeme: "<".to_string(),
+                            line,
+                            column,
+                        }
+                    }
+                }
+                Some(b'>') => {
+                    self.advance();
+                    if self.current() == Some(b'=') {
+                        Token {
+                            type_token: TokenType::GreaterEq,
+                            lexeme: ">=".to_string(),
+                            line,
+                            column,
+                        }
+                    } else {
+                        Token {
+                            type_token: TokenType::Greater,
+                            lexeme: ">".to_string(),
+                            line,
+                            column,
+                        }
+                    }
+                }
+                Some(b'!') => {
+                    self.advance();
+                    if self.current() == Some(b'=') {
+                        Token {
+                            type_token: TokenType::ReverseEq,
+                            lexeme: "!=".to_string(),
+                            line,
+                            column,
+                        }
+                    } else {
+                        Token {
+                            type_token: TokenType::ReverseBool,
+                            lexeme: "!".to_string(),
+                            line,
+                            column,
+                        }
+                    }
+                }
+                // Some(byte) => { // For Lambda Declaration
+                //     Token { type_token: (), lexeme: (), line, column }
+                // }
+                Some(byte) if byte.is_ascii_alphabetic() || byte == b'_' => {
+                    // keywords and identifiers
+                    let lexeme =
+                        self.consume_bites(|pred| pred.is_ascii_alphabetic() || pred == b'_');
+
+                    let token_type = if let Some(keyword) = Self::is_keyword(lexeme) {
+                        keyword
+                    } else {
+                        TokenType::AllocIdentifier
+                    };
+
+                    Token {
+                        type_token: token_type,
+                        lexeme: lexeme.to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(byte) if byte.is_ascii_digit() => {
+                    let lexeme = self.consume_bites(|pred| pred.is_ascii_digit() || pred == b'.');
+                    Token {
+                        type_token: TokenType::Number,
+                        lexeme: lexeme.to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(byte) => {
+                    self.advance();
+                    Token {
+                        type_token: TokenType::NoFeature,
+                        lexeme: format!("UNKNOWN : {}", byte as char),
+                        line,
+                        column,
+                    }
+                }
+            }
+        }
+        // follow up!
+
+        pub fn tokenize(&mut self) -> Vec<Token> {
+            let mut tokens: Vec<Token> = Vec::new();
+
+            loop {
+                let token = self.peek_tokens();
+                if token.type_token == TokenType::EOF {
+                    tokens.push(token);
+                    break;
+                }
+                tokens.push(token);
+            }
+
+            tokens
         }
     }
 }

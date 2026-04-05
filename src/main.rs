@@ -1,3 +1,5 @@
+use crate::ast::lexer::lex_analisys::Lexer;
+
 /*
 
 -- Define models 
@@ -30,7 +32,7 @@ mod model;
  
 fn main() {    
     //call to init console
-    let mut lines = String::new();
+    /*let mut lines = String::new();
     loop {
         println!("hearing ....");        
         std::io::stdin().read_line(&mut lines).unwrap_or(0_usize);
@@ -43,5 +45,14 @@ fn main() {
             break;
         }
         lines = String::new();
+    }*/
+    let string_start = "lbmd => {5 + 5}";
+    let mut lexer = Lexer::new(string_start);
+    let tokens = lexer.tokenize();
+    for token in tokens {
+        println!(
+            "{:?} '{}' at {}:{}",
+            token.type_token, token.lexeme, token.line, token.column
+        );
     }
 }

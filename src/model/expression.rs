@@ -1,11 +1,51 @@
-use crate::model::{domains::domain_definition::Domain, operators::BOperator};
+use crate::model::domains::domain_definition::Domain;
+use crate::model::expression::operators::*;
+
+mod operators{
+    #[derive(Debug, PartialEq, Clone)]
+    pub enum BOperator {
+        // Arithmetic
+        Plus,
+        Substract,
+        Multiply,
+        Divide,
+        Power, //
+        // Comparison
+        Equals,
+        NotEqual,
+        Greater,
+        GreaterEqual,
+        Less,
+        LessEqual,
+    
+        // Logical
+        And, // &&
+        Or,  // ||
+    
+        // Punctuation
+        LParenthesis,
+        RParenthesis,
+    
+        //conversions from decimals to binaries and vice versa
+        Convert, // ' at 2 mode
+    }
+    
+    pub enum UOperator {
+        Not, // !
+        Radix,
+        Factorial,
+        Negative,
+    }
+
+}
+
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Number(f64, i64),
     Boolean(bool),
     Hex(String, i64),
-    Symbol(String, f64/* power! */),
+    Symbol(String, /* power*/f64),
     Vector(Vec<Value>),
     Matrix(Vec<Vec<Value>>),    
     NoValue
@@ -14,6 +54,7 @@ pub enum Value {
 #[derive(Debug, Clone)]
 pub enum Expression {
     Values(Value),
+    Variable(String),
     Binary {
         op: BOperator,
         left: Box<Expression>,
@@ -31,7 +72,13 @@ pub enum Expression {
     Lambda {
         params: Vec<String>,
         body: Box<Expression>
+    },
+    Alloc {
+        name: String,
+        init: Box<Expression>,
+        body: Box<Expression>,
     }
+    
 }
 
 impl Expression {
