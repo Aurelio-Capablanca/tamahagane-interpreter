@@ -46,7 +46,7 @@ fn main() {
         }
         lines = String::new();
     }*/
-    let string_start = "lbmd => {5 + 5}";
+    let string_start = "(&) => {5 + 5}";
     let mut lexer = Lexer::new(string_start);
     let tokens = lexer.tokenize();
     for token in tokens {

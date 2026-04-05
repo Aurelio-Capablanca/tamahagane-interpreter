@@ -34,6 +34,7 @@ pub mod token {
         And,         //&& | and
         Or,          // || | or
         Not,         // ! | not
+        LambdaAssign, // => 
 
         // Delimitations
         LParen,    //(
@@ -45,7 +46,7 @@ pub mod token {
         Semicolon, //;
 
         //own usage at Tamahagane!
-        Apostrohe, // ' -- For Base declaration        
+        Apostrohe, // ' -- For Base declaration
         //end for file
         EOF,
     }
@@ -169,11 +170,31 @@ pub mod lex_analisys {
                 },
                 Some(b'(') => {
                     self.advance();
-                    Token {
-                        type_token: TokenType::LParen,
-                        lexeme: "(".to_string(),
-                        line,
-                        column,
+                    if self.current() == Some(b'&') {
+                        self.advance();
+                        if self.current() == Some(b')') {
+                            self.advance();
+                            Token {
+                                type_token: TokenType::Lambda,
+                                lexeme: "(&)".to_string(),
+                                line,
+                                column,
+                            }
+                        } else {
+                            Token {
+                                type_token: TokenType::LParen,
+                                lexeme: "(".to_string(),
+                                line,
+                                column,
+                            }
+                        }
+                    } else {
+                        Token {
+                            type_token: TokenType::LParen,
+                            lexeme: "(".to_string(),
+                            line,
+                            column,
+                        }
                     }
                 }
                 Some(b')') => {
@@ -272,6 +293,14 @@ pub mod lex_analisys {
                         Token {
                             type_token: TokenType::EqEqs,
                             lexeme: "==".to_string(),
+                            line,
+                            column,
+                        }
+                    } else if self.current() == Some(b'>') {
+                        self.advance();
+                        Token {
+                            type_token: TokenType::LambdaAssign,
+                            lexeme: "=>".to_string(),
                             line,
                             column,
                         }
