@@ -409,7 +409,6 @@ pub mod lex_analisys {
             }
         }
         // follow up!
-
         pub fn tokenize(&mut self) -> Vec<Token> {
             let mut tokens: Vec<Token> = Vec::new();
 
