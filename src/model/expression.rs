@@ -1,7 +1,7 @@
 use crate::model::domains::domain_definition::Domain;
 use crate::model::expression::operators::*;
 
-mod operators{
+mod operators {
     #[derive(Debug, PartialEq, Clone)]
     pub enum BOperator {
         // Arithmetic
@@ -17,38 +17,36 @@ mod operators{
         GreaterEqual,
         Less,
         LessEqual,
-    
+
         // Logical
         And, // &&
         Or,  // ||
-    
+
         // Punctuation
         LParenthesis,
         RParenthesis,
-    
+
         //conversions from decimals to binaries and vice versa
         Convert, // ' at 2 mode
     }
-    
+
     pub enum UOperator {
         Not, // !
         Radix,
         Factorial,
         Negative,
     }
-
 }
-
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
-    Number(f64, i64),
+    Number(f64, Option<i64>),
     Boolean(bool),
-    Hex(String, i64),
-    Symbol(String, /* power*/f64),
+    Hex(String, Option<i64>),
+    Symbol(String, /* power*/ f64),
     Vector(Vec<Value>),
-    Matrix(Vec<Vec<Value>>),    
-    NoValue
+    Matrix(Vec<Vec<Value>>),
+    NoValue,
 }
 
 #[derive(Debug, Clone)]
@@ -64,21 +62,25 @@ pub enum Expression {
         op: BOperator,
         expr: Box<Expression>,
     },
-    Function{
+    Function {
         params: Vec<String>,
         body: Box<Expression>,
-        domain: Domain
+        domain: Domain,
     },
     Lambda {
         params: Vec<String>,
-        body: Box<Expression>
+        body: Box<Expression>,
     },
     Alloc {
         name: String,
         init: Box<Expression>,
         body: Box<Expression>,
-    }
-    
+    },
+    If {
+        conditional: Box<Expression>,
+        primary_block: Box<Expression>,
+        else_block: Option<Box<Expression>>
+    },
 }
 
 impl Expression {
@@ -100,11 +102,11 @@ impl Expression {
         match self {
             Expression::Values(Value::Number(_, b)) => {
                 println!("You Reached a Number!!!");
-                b
+                b.as_ref().unwrap()
             }
             Expression::Values(Value::Hex(_, b)) => {
                 println!("You Reached a String!!!");
-                b
+                b.as_ref().unwrap()
             }
             _ => {
                 println!("You Reached a Unknown!!!");
@@ -116,7 +118,7 @@ impl Expression {
     pub fn to_numeric(&self) -> Expression {
         match self {
             Expression::Values(Value::Boolean(b)) => {
-                Expression::Values(Value::Number(if *b { 1.0 } else { 0.0 }, 10))
+                Expression::Values(Value::Number(if *b { 1.0 } else { 0.0 }, Some(10)))
             }
             _ => self.clone(),
         }
@@ -141,7 +143,9 @@ impl Expression {
 
     pub fn to_boolean(&self) -> Expression {
         match self {
-            Expression::Values(Value::Number(n, _)) => Expression::Values(Value::Boolean(*n != 0.0)),
+            Expression::Values(Value::Number(n, _)) => {
+                Expression::Values(Value::Boolean(*n != 0.0))
+            }
             _ => self.clone(),
         }
     }

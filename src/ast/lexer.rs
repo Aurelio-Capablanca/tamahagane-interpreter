@@ -16,25 +16,26 @@ pub mod token {
         Lambda,
         Alloc,
         Fn,
+        If,
 
         //Operators
-        Plus,        // +
-        Minus,       // -
-        Star,        // *
-        Slash,       // /
-        Caret,       // ^
-        Eqs,         // =
-        EqEqs,       // ==
-        Lesser,      // <
-        Greater,     //>
-        LesserEq,    // <=
-        GreaterEq,   //>=
-        ReverseBool, // !
-        ReverseEq,   // !=
-        And,         //&& | and
-        Or,          // || | or
-        Not,         // ! | not
-        LambdaAssign, // => 
+        Plus,         // +
+        Minus,        // -
+        Star,         // *
+        Slash,        // /
+        Caret,        // ^
+        Eqs,          // =
+        EqEqs,        // ==
+        Lesser,       // <
+        Greater,      //>
+        LesserEq,     // <=
+        GreaterEq,    //>=
+        ReverseBool,  // !
+        ReverseEq,    // !=
+        And,          //&& | and
+        Or,           // || | or
+        Not,          // ! | not
+        LambdaAssign, // =>
 
         // Delimitations
         LParen,    //(
@@ -51,6 +52,7 @@ pub mod token {
         EOF,
     }
 
+    #[derive(Debug, Clone)]
     pub struct Token {
         pub type_token: TokenType,
         pub lexeme: String, // actual content from Lexer
@@ -60,8 +62,6 @@ pub mod token {
 }
 
 pub mod lex_analisys {
-    use std::thread::current;
-
     use crate::ast::lexer::token::{Token, TokenType};
 
     pub struct Lexer<'a> {
@@ -144,12 +144,13 @@ pub mod lex_analisys {
             match sub {
                 "alloc" | "allc" => Some(TokenType::Alloc),
                 "fn" => Some(TokenType::Fn),
-                "lbmd" | "(&)" => Some(TokenType::Lambda),
+                "lbmd" => Some(TokenType::Lambda),
                 "true" | "True" => Some(TokenType::True),
                 "false" | "False" => Some(TokenType::False),
                 "and" => Some(TokenType::And),
                 "not" => Some(TokenType::Not),
                 "or" => Some(TokenType::Or),
+                "if" => Some(TokenType::If),
                 _ => None,
             }
         }
@@ -265,6 +266,15 @@ pub mod lex_analisys {
                     Token {
                         type_token: TokenType::Minus,
                         lexeme: "-".to_string(),
+                        line,
+                        column,
+                    }
+                }
+                Some(b'/') => {
+                    self.advance();
+                    Token {
+                        type_token: TokenType::Slash,
+                        lexeme: "/".to_string(),
                         line,
                         column,
                     }

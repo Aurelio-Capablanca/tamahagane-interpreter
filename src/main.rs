@@ -46,7 +46,10 @@ fn main() {
         }
         lines = String::new();
     }*/
-    let string_start = "(&) => {5 + 5}";
+    let string_start = "(&) => {78 + 7}";/*"(&) => {
+        alloc reiter = 604; 
+        alloc calc = 67 + 4;
+        }";*///"alloc f = 0;";//"(&) => {5 + 5}";
     let mut lexer = Lexer::new(string_start);
     let tokens = lexer.tokenize();
     for token in tokens {
