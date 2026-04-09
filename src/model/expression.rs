@@ -1,7 +1,7 @@
 use crate::model::domains::domain_definition::Domain;
 use crate::model::expression::operators::*;
 
-mod operators {
+pub mod operators {
     #[derive(Debug, PartialEq, Clone)]
     pub enum BOperator {
         // Arithmetic
@@ -30,6 +30,7 @@ mod operators {
         Convert, // ' at 2 mode
     }
 
+    #[derive(Debug, Clone, PartialEq)]
     pub enum UOperator {
         Not, // !
         Radix,
@@ -59,7 +60,7 @@ pub enum Expression {
         right: Box<Expression>,
     },
     Unary {
-        op: BOperator,
+        op: UOperator,
         expr: Box<Expression>,
     },
     Function {

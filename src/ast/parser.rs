@@ -1,3 +1,4 @@
+use crate::model::expression::operators::*;
 use crate::{
     ast::lexer::token::{Token, TokenType},
     model::expression::{Expression, Value},
@@ -73,7 +74,7 @@ impl Parser {
                     let expression_paren = self.make_expression().unwrap();
                     self.consume_elements(TokenType::RParen).unwrap();
                     Ok(expression_paren)
-                },
+                }
                 TokenType::LCBracket => {
                     self.advance();
                     let expression_curl_b = self.make_expression().unwrap();
@@ -85,6 +86,86 @@ impl Parser {
         } else {
             Err("Unexpected End of block! ".to_string())
         }
+    }
+
+    fn unary(&mut self) -> Result<Expression, String> {
+        if let Some(token) = self.current() {
+            match token.type_token {
+                TokenType::Minus => {
+                    self.advance();
+                    let oper = self.unary().unwrap();
+                    Ok(Expression::Unary {
+                        op: UOperator::Negative,
+                        expr: Box::new(oper),
+                    })
+                }
+                TokenType::Not => {
+                    self.advance();
+                    let oper = self.unary().unwrap();
+                    Ok(Expression::Unary {
+                        op: UOperator::Not,
+                        expr: Box::new(oper),
+                    })
+                }
+                _ => Err("Unary Token not find !".to_string()),
+            }
+        } else {
+            Err("Unary Error token".to_string())
+        }
+    }
+
+    fn power(&mut self) -> Result<Expression, String> {
+        let mut left = self.unary().unwrap();
+        if let Some(token) = self.current() {
+            if token.type_token == TokenType::Caret {
+                self.advance();
+                let power_next = self.power().unwrap();
+                left = Expression::Binary {
+                    op: BOperator::Power,
+                    left: Box::new(left),
+                    right: Box::new(power_next),
+                };
+            }
+        }
+        Ok(left)
+    }
+
+    fn multiplicative(&mut self) -> Result<Expression, String> {
+        let mut left = self.power().unwrap();
+        while let Some(token) = self.current() {
+            let operator = match token.type_token {
+                TokenType::Star => BOperator::Multiply,
+                TokenType::Slash => BOperator::Divide,
+                _ => break,
+            };
+            self.advance();
+            let right = self.power().unwrap();
+            left = Expression::Binary {
+                op: operator,
+                left: Box::new(left),
+                right: Box::new(right),
+            }
+        }
+        Ok(left)
+    }
+
+    fn additive(&mut self) -> Result<Expression, String> {
+        let mut left = self.multiplicative().unwrap();
+        while let Some(token) = self.current() {
+            let operator = match token.type_token {
+                TokenType::Plus => BOperator::Plus,
+                TokenType::Minus => BOperator::Substract,
+                _ => break,
+            };
+            self.advance();
+            let right = self.multiplicative().unwrap();
+            left = Expression::Binary {
+                op: operator,
+                left: Box::new(left),
+                right: Box::new(right),
+            }
+        }
+        Ok(left)
     }
 
     fn make_expression(&mut self) -> Result<Expression, String> {
