@@ -12,6 +12,7 @@ pub mod operators {
         Power, //
         // Comparison
         Equals,
+        EqualsEquals,
         NotEqual,
         Greater,
         GreaterEqual,

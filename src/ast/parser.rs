@@ -168,6 +168,43 @@ impl Parser {
         Ok(left)
     }
 
+    fn comparisons(&mut self) -> Result<Expression, String> {
+        let mut left = self.additive().unwrap();
+        while let Some(token) = self.current() {
+            let operator = match token.type_token {
+                TokenType::EqEqs => BOperator::EqualsEquals,
+                TokenType::Lesser => BOperator::Less,
+                TokenType::LesserEq => BOperator::LessEqual,
+                TokenType::Greater => BOperator::Greater,
+                TokenType::GreaterEq => BOperator::GreaterEqual,
+                _ => break,
+            };
+            let right = self.comparisons().unwrap();
+            left = Expression::Binary {
+                op: operator,
+                left: Box::new(left),
+                right: Box::new(right),
+            };
+        }
+        Ok(left)
+    }
+
+    fn and_expression(&mut self) -> Result<Expression, String> {
+        let mut left = self.comparisons().unwrap();
+        while let Some(token) = self.current() {
+            if token.type_token == TokenType::And {
+                self.advance();
+                let right = self.comparisons().unwrap();
+                left = Expression::Binary {
+                    op: BOperator::And,
+                    left: Box::new(left),
+                    right: Box::new(right),
+                }
+            }
+        }
+        Ok(left)
+    }
+
     fn make_expression(&mut self) -> Result<Expression, String> {
         Ok(Expression::Values(Value::NoValue))
     }
