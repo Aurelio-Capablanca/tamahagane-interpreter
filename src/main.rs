@@ -11,6 +11,7 @@ use crate::ast::lexer::lex_analisys::Lexer;
 mod ast;
 mod interpreter;
 mod model;
+mod functions;
 
 /*
  modes:
