@@ -1,4 +1,4 @@
-use crate::ast::lexer::lex_analisys::Lexer;
+use crate::ast::{lexer::{lex_analisys::Lexer, token::Token}, parser::Parser};
 
 /*
 
@@ -52,11 +52,21 @@ fn main() {
         alloc calc = 67 + 4;
         }";*///"alloc f = 0;";//"(&) => {5 + 5}";
     let mut lexer = Lexer::new(string_start);
-    let tokens = lexer.tokenize();
-    for token in tokens {
+    let tokens : Vec<Token> = lexer.tokenize();
+    for token in &tokens {
         println!(
             "{:?} '{}' at {}:{}",
             token.type_token, token.lexeme, token.line, token.column
         );
+    }
+    let mut parser : Parser = Parser::new(tokens);
+    let result = parser.parse();
+    match  result {
+        Ok(out) => {
+            println!("Exp : {:?}",out)
+        }
+        Err(err) => {
+            eprintln!("outcome err : {}",err)
+        }
     }
 }

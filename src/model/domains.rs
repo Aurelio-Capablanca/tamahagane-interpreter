@@ -1,4 +1,3 @@
-
 pub mod domain_names {
 
     #[derive(Debug, Clone)]
@@ -12,9 +11,18 @@ pub mod domain_names {
 }
 
 pub mod domain_definition {
-    
+
+    use std::sync::LazyLock;
+
     use crate::model::domains::domain_names::Mode;
-    
+
+    pub static DOMAIN_DIC: LazyLock<Vec<Domain>> = LazyLock::new(|| {
+        Vec::from([
+            Domain::new(true, "arthm".to_string(), 2, Mode::Arithmetics, Vec::new()),
+            Domain::new(true, "bool_alg".to_string(), 2, Mode::BooleanAlgebra, Vec::new()),
+        ])
+    });
+
     #[derive(Debug, Clone)]
     pub struct Domain {
         status: bool,
@@ -23,7 +31,7 @@ pub mod domain_definition {
         mode: Mode,
         sub_mode: Vec<Box<Domain>>,
     }
-    
+
     impl Domain {
         pub fn empty() -> Self {
             Self {
@@ -34,7 +42,7 @@ pub mod domain_definition {
                 sub_mode: Vec::new(),
             }
         }
-    
+
         pub fn new(
             status: bool,
             command: String,
@@ -50,38 +58,36 @@ pub mod domain_definition {
                 sub_mode: sub_mode,
             }
         }
-    
+
         //get as reference library
         pub fn get_precision_as_ref(&self) -> &i32 {
             &self.precision
         }
-    
+
         //set and get library
         pub fn set_precision_and_get(mut self, precision: i32) -> Self {
             self.precision = precision;
             self
         }
-    
+
         pub fn set_mode_and_get(mut self, mode: Mode) -> Self {
             self.mode = mode;
             self
         }
-    
+
         pub fn set_status_and_get(mut self, status_in: bool) -> Self {
             self.status = status_in;
             self
         }
-    
+
         pub fn set_command_and_get(mut self, command_in: String) -> Self {
             self.command = command_in;
             self
         }
-    
+
         pub fn add_sub_modes_and_get(mut self, submode: Domain) -> Self {
             self.sub_mode.push(Box::new(submode));
             self
         }
     }
-        
 }
-

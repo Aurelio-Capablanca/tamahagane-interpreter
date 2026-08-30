@@ -62,7 +62,23 @@ pub mod token {
 }
 
 pub mod lex_analisys {
+    use std::{collections::HashMap, sync::LazyLock};
+
     use crate::ast::lexer::token::{Token, TokenType};
+
+    static RESERVED_KEYWORDS: LazyLock<HashMap<String, TokenType>> = LazyLock::new(|| {
+        HashMap::from([
+            ("alloc".to_string(), TokenType::Alloc),
+            ("fn".to_string(), TokenType::Fn),
+            ("lambda".to_string(), TokenType::Lambda),
+            ("true".to_string(), TokenType::True),
+            ("false".to_string(), TokenType::False),
+            ("and".to_string(), TokenType::And),
+            ("not".to_string(), TokenType::Not),
+            ("or".to_string(), TokenType::Or),
+            ("if".to_string(), TokenType::If),
+        ])
+    });
 
     pub struct Lexer<'a> {
         input: &'a [u8],
@@ -140,18 +156,11 @@ pub mod lex_analisys {
         }
 
         // state keywords
-        fn is_keyword(sub: &str) -> Option<TokenType> {
-            match sub {
-                "alloc" | "allc" => Some(TokenType::Alloc),
-                "fn" => Some(TokenType::Fn),
-                "lbmd" => Some(TokenType::Lambda),
-                "true" | "True" => Some(TokenType::True),
-                "false" | "False" => Some(TokenType::False),
-                "and" => Some(TokenType::And),
-                "not" => Some(TokenType::Not),
-                "or" => Some(TokenType::Or),
-                "if" => Some(TokenType::If),
-                _ => None,
+        fn is_keyword(sub: &str) -> Option<&TokenType> {
+            if RESERVED_KEYWORDS.contains_key(sub) {
+                RESERVED_KEYWORDS.get(sub)
+            } else {
+                None
             }
         }
 
@@ -376,17 +385,13 @@ pub mod lex_analisys {
                             column,
                         }
                     }
-                }
-                // Some(byte) => { // For Lambda Declaration
-                //     Token { type_token: (), lexeme: (), line, column }
-                // }
+                }                
                 Some(byte) if byte.is_ascii_alphabetic() || byte == b'_' => {
                     // keywords and identifiers
                     let lexeme =
                         self.consume_bites(|pred| pred.is_ascii_alphabetic() || pred == b'_');
-
                     let token_type = if let Some(keyword) = Self::is_keyword(lexeme) {
-                        keyword
+                        *keyword
                     } else {
                         TokenType::AllocIdentifier
                     };
@@ -418,10 +423,11 @@ pub mod lex_analisys {
                 }
             }
         }
+        
+        
         // follow up!
         pub fn tokenize(&mut self) -> Vec<Token> {
             let mut tokens: Vec<Token> = Vec::new();
-
             loop {
                 let token = self.peek_tokens();
                 if token.type_token == TokenType::EOF {
@@ -430,8 +436,9 @@ pub mod lex_analisys {
                 }
                 tokens.push(token);
             }
-
             tokens
         }
+        
+        
     }
 }

@@ -42,19 +42,23 @@ pub mod operators {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
-    Number(f64, Option<i64>),
+    Number(f64 /*number*/, Option<i64> /*given base*/),
     Boolean(bool),
-    Hex(String, Option<i64>),
+    Hex(String /*number*/, Option<i64> /*given base */),
     Symbol(String, /* power*/ f64),
-    Vector(Vec<Value>),
-    Matrix(Vec<Vec<Value>>),
-    NoValue,
+    Algebraic(f64 /*coefix*/, &'static str /*symbol*/),
+    Array(Vec<Value>),
+    D2Array(Vec<Vec<Value>>),
+    Nones,
 }
 
 #[derive(Debug, Clone)]
 pub enum Expression {
     Values(Value),
-    Variable(String),
+    Variable {
+        var_name: String,
+        val: Value,
+    },
     Binary {
         op: BOperator,
         left: Box<Expression>,
@@ -81,7 +85,7 @@ pub enum Expression {
     If {
         conditional: Box<Expression>,
         primary_block: Box<Expression>,
-        else_block: Option<Box<Expression>>
+        else_block: Option<Box<Expression>>,
     },
 }
 
