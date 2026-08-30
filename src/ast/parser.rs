@@ -49,7 +49,7 @@ impl Parser {
     fn elements(&mut self) -> Result<Expression, String> {
         println!("reach : elements");
         if let Some(token) = self.tokens.get(self.position) {
-            println!("current Token : {:?}",token);
+            println!("current Token : {:?}", token);
             match token.type_token {
                 TokenType::Number => {
                     let content = token.lexeme.clone();
@@ -101,6 +101,20 @@ impl Parser {
                     self.consume_elements(TokenType::RCBracket).unwrap();
                     Ok(expression_curl_b)
                 }
+                TokenType::Lambda | TokenType::LambdaAssign => {
+                    self.advance();
+                    let expression_lambda = self.make_expression().unwrap();
+                    let funct = Expression::Function {
+                        params: Vec::new(),
+                        body: Box::new(expression_lambda),
+                        domain: if let Some(get) = domain_definition::DOMAIN_DIC.get(0) {
+                            get.clone()
+                        } else {
+                            Domain::empty()
+                        },
+                    };
+                    Ok(funct)
+                }
                 _ => Err(format!("Unexpected Token : {:?}", token.type_token)),
             }
         } else {
@@ -111,7 +125,7 @@ impl Parser {
     fn unary(&mut self) -> Result<Expression, String> {
         println!("reach : unary");
         if let Some(token) = self.current() {
-            println!("current Token : {:?}", token);
+            println!("current Token at 'unary': {:?}", token);
             match token.type_token {
                 TokenType::Minus => {
                     self.advance();
@@ -129,19 +143,19 @@ impl Parser {
                         expr: Box::new(oper),
                     });
                 }
-                _ => {
-                    println!("Nothing to do now")
-                }
+                _ => self.elements(),
             }
+        } else {
+            Err("Nothing to do now".to_string())
         }
-        self.elements()
+        //self.elements()
     }
 
     fn power(&mut self) -> Result<Expression, String> {
         println!("reach : power");
         let mut left = self.unary().unwrap();
         if let Some(token) = self.current() {
-            println!("current Token : {:?}", token);
+            println!("current Token at 'power': {:?}", token);
             if token.type_token == TokenType::Caret {
                 self.advance();
                 let power_next = self.power().unwrap();
@@ -159,7 +173,7 @@ impl Parser {
         println!("reach : multiplicative");
         let mut left = self.power().unwrap();
         while let Some(token) = self.current() {
-            println!("current Token : {:?}", token);
+            println!("current Token at 'multiplicative': {:?}", token);
             let operator = match token.type_token {
                 TokenType::Star => BOperator::Multiply,
                 TokenType::Slash => BOperator::Divide,
@@ -180,7 +194,7 @@ impl Parser {
         println!("reach : additive");
         let mut left = self.multiplicative().unwrap();
         while let Some(token) = self.current() {
-            println!("current Token : {:?}", token);
+            println!("current Token at 'additive': {:?}", token);
             let operator = match token.type_token {
                 TokenType::Plus => BOperator::Plus,
                 TokenType::Minus => BOperator::Substract,
@@ -201,7 +215,7 @@ impl Parser {
         println!("reach : comparisons");
         let mut left = self.additive().unwrap();
         while let Some(token) = self.current() {
-            println!("current Token : {:?}", token);
+            println!("current Token at 'comparisons': {:?}", token);
             let operator = match token.type_token {
                 TokenType::EqEqs => BOperator::EqualsEquals,
                 TokenType::Lesser => BOperator::Less,
@@ -210,7 +224,8 @@ impl Parser {
                 TokenType::GreaterEq => BOperator::GreaterEqual,
                 _ => break,
             };
-            let right = self.comparisons().unwrap();
+            self.advance();
+            let right = self.additive().unwrap();
             left = Expression::Binary {
                 op: operator,
                 left: Box::new(left),
@@ -224,7 +239,7 @@ impl Parser {
         println!("reach : and_expression");
         let mut left = self.comparisons().unwrap();
         while let Some(token) = self.current() {
-            println!("current Token : {:?}", token);
+            println!("current Token at 'and_expression': {:?}", token);
             if token.type_token == TokenType::And {
                 self.advance();
                 let right = self.comparisons().unwrap();
@@ -233,6 +248,8 @@ impl Parser {
                     left: Box::new(left),
                     right: Box::new(right),
                 }
+            } else {
+                break;
             }
         }
         Ok(left)
@@ -242,7 +259,7 @@ impl Parser {
         println!("reach : or_expresion");
         let mut left = self.and_expression().unwrap();
         while let Some(token) = self.current() {
-            println!("current Token : {:?}", token);
+            println!("current Token at 'or_expresion': {:?}", token);
             if token.type_token == TokenType::Or {
                 self.advance();
                 let right = self.and_expression().unwrap();
@@ -251,6 +268,8 @@ impl Parser {
                     left: Box::new(left),
                     right: Box::new(right),
                 }
+            } else {
+                break;
             }
         }
         Ok(left)
@@ -260,7 +279,7 @@ impl Parser {
         println!("reach : fn_lambda_expression");
         let mut left = self.or_expresion().unwrap();
         while let Some(token) = self.current() {
-            println!("current Token : {:?}", token);
+            println!("current Token at 'fn_lambda_expression': {:?}", token);
             if token.type_token == TokenType::Fn || token.type_token == TokenType::Lambda {
                 self.advance();
                 left = Expression::Function {
@@ -272,6 +291,8 @@ impl Parser {
                         Domain::empty()
                     },
                 }
+            } else {
+                break;
             }
         }
         Ok(left)

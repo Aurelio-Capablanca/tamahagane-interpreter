@@ -1,4 +1,6 @@
 pub mod token {
+    use crate::ast::lexer::token::TokenType::EOF;
+
 
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     pub enum TokenType {
@@ -58,6 +60,12 @@ pub mod token {
         pub lexeme: String, // actual content from Lexer
         pub line: usize,
         pub column: usize,
+    }
+    
+    impl Token {
+        pub fn empty() -> Self {
+            Self { type_token: EOF, lexeme: "".to_string(), line: 0, column: 0 }
+        }
     }
 }
 
