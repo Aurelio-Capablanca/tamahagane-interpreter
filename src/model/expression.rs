@@ -55,10 +55,7 @@ pub enum Value {
 #[derive(Debug, Clone)]
 pub enum Expression {
     Values(Value),
-    Variable {
-        var_name: String,
-        val: Value,
-    },
+    Identifier(String),
     Binary {
         op: BOperator,
         left: Box<Expression>,
@@ -79,8 +76,8 @@ pub enum Expression {
     },
     Alloc {
         name: String,
-        init: Box<Expression>,
-        body: Box<Expression>,
+        init: Box<Option<Expression>>,
+        body: Box<Option<Expression>>,
     },
     If {
         conditional: Box<Expression>,

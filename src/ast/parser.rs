@@ -1,5 +1,4 @@
-use std::fmt::Alignment::{Left, Right};
-
+use crate::ast::lexer::token::TokenType::{AllocIdentifier, Eqs};
 use crate::model::domains::domain_definition::{self, Domain};
 use crate::model::expression::operators::*;
 use crate::{
@@ -38,6 +37,7 @@ impl Parser {
 
     fn consume_elements(&mut self, expected: TokenType) -> Result<Token, String> {
         if let Some(token) = self.tokens.get(self.position) {
+            println!("postition in : {:?}", token);
             if token.type_token == expected {
                 self.position += 1;
                 return Ok(token.clone());
@@ -49,7 +49,7 @@ impl Parser {
     fn elements(&mut self) -> Result<Expression, String> {
         println!("reach : elements");
         if let Some(token) = self.tokens.get(self.position) {
-            println!("current Token : {:?}", token);
+            println!("current Token at 'elements' : {:?}", token);
             match token.type_token {
                 TokenType::Number => {
                     let content = token.lexeme.clone();
@@ -71,10 +71,15 @@ impl Parser {
                     Ok(Expression::Values(Value::Boolean(false)))
                 }
                 TokenType::Alloc => {
-                    let alloc_name = token.lexeme.clone();
                     self.advance();
+                    let current_token = self.current();
+                    let getter = current_token.unwrap();
+                    let name_alloc = getter.lexeme.clone();
+                    self.advance();
+                    self.consume_elements(Eqs).unwrap();                    
                     let mut val: Value = Value::Nones;
                     if let Some(token) = self.current() {
+                        println!("current value token : {:?}",token);
                         if token.type_token == TokenType::Number {
                             val = match token.lexeme.parse() {
                                 Ok(cont) => Value::Number(cont, Some(10)),
@@ -84,9 +89,10 @@ impl Parser {
                             };
                         }
                     }
-                    Ok(Expression::Variable {
-                        var_name: alloc_name,
-                        val,
+                    Ok(Expression::Alloc {
+                        name: name_alloc,
+                        init: Box::new(None),
+                        body: Box::new(Some(Expression::Values(val))),
                     })
                 }
                 TokenType::LParen => {
@@ -98,8 +104,14 @@ impl Parser {
                 TokenType::LCBracket => {
                     self.advance();
                     let expression_curl_b = self.make_expression().unwrap();
-                    self.consume_elements(TokenType::RCBracket).unwrap();
-                    Ok(expression_curl_b)
+                    match self.consume_elements(TokenType::RCBracket) {
+                        Ok(_) => Ok(expression_curl_b),
+                        Err(err) => {
+                            println!("Error at ? {}", err);
+                            self.advance();
+                            Ok(expression_curl_b)
+                        }
+                    }
                 }
                 TokenType::Lambda | TokenType::LambdaAssign => {
                     self.advance();
@@ -143,12 +155,10 @@ impl Parser {
                         expr: Box::new(oper),
                     });
                 }
-                _ => self.elements(),
+                _ => {}
             }
-        } else {
-            Err("Nothing to do now".to_string())
         }
-        //self.elements()
+        self.elements()
     }
 
     fn power(&mut self) -> Result<Expression, String> {
@@ -275,31 +285,8 @@ impl Parser {
         Ok(left)
     }
 
-    fn fn_lambda_expression(&mut self) -> Result<Expression, String> {
-        println!("reach : fn_lambda_expression");
-        let mut left = self.or_expresion().unwrap();
-        while let Some(token) = self.current() {
-            println!("current Token at 'fn_lambda_expression': {:?}", token);
-            if token.type_token == TokenType::Fn || token.type_token == TokenType::Lambda {
-                self.advance();
-                left = Expression::Function {
-                    params: Vec::new(),
-                    body: Box::new(left),
-                    domain: if let Some(get) = domain_definition::DOMAIN_DIC.get(0) {
-                        get.clone()
-                    } else {
-                        Domain::empty()
-                    },
-                }
-            } else {
-                break;
-            }
-        }
-        Ok(left)
-    }
-
     fn make_expression(&mut self) -> Result<Expression, String> {
-        self.fn_lambda_expression()
+        self.or_expresion()
     }
 
     pub fn parse(&mut self) -> Result<Expression, String> {

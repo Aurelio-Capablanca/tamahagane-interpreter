@@ -22,7 +22,8 @@ mod functions;
   (2.3 functions)  
  }
  (3, conversion base) {
-    special_char = ' (base of a number)
+    special_char = _ (base of a number)
+    using as 100_b10 -> b_2 
  }
  (4, calculus)
  (5, physics)
@@ -47,10 +48,12 @@ fn main() {
         }
         lines = String::new();
     }*/
-    let string_start = "(&) => {78 + 7}";/*"(&) => {
-        alloc reiter = 604; 
-        alloc calc = 67 + 4;
-        }";*///"alloc f = 0;";//"(&) => {5 + 5}";
+    let string_start = "(&) => {
+            alloc a = 604; 
+            alloc b = 67 + 4;
+        }";
+        //"alloc f = 0;";//"(&) => {5 + 5}";
+        //"(&) => {78 + 7}";
     let mut lexer = Lexer::new(string_start);
     let tokens : Vec<Token> = lexer.tokenize();
     for token in &tokens {
