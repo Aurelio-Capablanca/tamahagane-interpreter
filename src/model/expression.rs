@@ -1,3 +1,4 @@
+use crate::ast::lexer::token::{Token, TokenType};
 use crate::model::domains::domain_definition::Domain;
 use crate::model::expression::operators::*;
 
@@ -54,8 +55,12 @@ pub enum Value {
 
 #[derive(Debug, Clone)]
 pub enum Expression {
-    Values(Value),
-    Identifier(String),
+    Values(Value),    
+    Variable{
+        val : Value,
+        operand: BOperator, 
+        semicolon: TokenType
+    },
     Binary {
         op: BOperator,
         left: Box<Expression>,
@@ -76,8 +81,7 @@ pub enum Expression {
     },
     Alloc {
         name: String,
-        init: Box<Option<Expression>>,
-        body: Box<Option<Expression>>,
+        value: Box<Expression>,        
     },
     If {
         conditional: Box<Expression>,

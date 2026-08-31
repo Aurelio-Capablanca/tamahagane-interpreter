@@ -1,4 +1,4 @@
-use crate::ast::lexer::token::TokenType::{AllocIdentifier, Eqs};
+use crate::ast::lexer::token::TokenType::{Eqs, Semicolon};
 use crate::model::domains::domain_definition::{self, Domain};
 use crate::model::expression::operators::*;
 use crate::{
@@ -71,15 +71,18 @@ impl Parser {
                     Ok(Expression::Values(Value::Boolean(false)))
                 }
                 TokenType::Alloc => {
+                    println!("no advance 'Alloc': {:?}", self.current().unwrap());
                     self.advance();
+                    println!("1st advance 'Alloc': {:?}", self.current().unwrap());
                     let current_token = self.current();
                     let getter = current_token.unwrap();
                     let name_alloc = getter.lexeme.clone();
                     self.advance();
-                    self.consume_elements(Eqs).unwrap();                    
+                    println!("2nd advance 'Alloc': {:?}", self.current().unwrap());
+                    self.consume_elements(Eqs).unwrap();
                     let mut val: Value = Value::Nones;
                     if let Some(token) = self.current() {
-                        println!("current value token : {:?}",token);
+                        println!("current value token : {:?}", token);
                         if token.type_token == TokenType::Number {
                             val = match token.lexeme.parse() {
                                 Ok(cont) => Value::Number(cont, Some(10)),
@@ -89,10 +92,17 @@ impl Parser {
                             };
                         }
                     }
+                    self.advance();
+                    println!("3rd advance 'Alloc': {:?}", self.current().unwrap());
+                    //self.make_expression().unwrap();
+                    self.consume_elements(Semicolon).unwrap();
                     Ok(Expression::Alloc {
                         name: name_alloc,
-                        init: Box::new(None),
-                        body: Box::new(Some(Expression::Values(val))),
+                        value: Box::new(Expression::Variable {
+                            val,
+                            operand: BOperator::Equals,
+                            semicolon: Semicolon,
+                        }),
                     })
                 }
                 TokenType::LParen => {
@@ -104,14 +114,10 @@ impl Parser {
                 TokenType::LCBracket => {
                     self.advance();
                     let expression_curl_b = self.make_expression().unwrap();
-                    match self.consume_elements(TokenType::RCBracket) {
-                        Ok(_) => Ok(expression_curl_b),
-                        Err(err) => {
-                            println!("Error at ? {}", err);
-                            self.advance();
-                            Ok(expression_curl_b)
-                        }
-                    }
+                    while self.current().as_ref().unwrap().type_token != TokenType::RCBracket {
+                        self.consume_elements(TokenType::RCBracket).unwrap();
+                    }                    
+                    Ok(expression_curl_b)
                 }
                 TokenType::Lambda | TokenType::LambdaAssign => {
                     self.advance();
@@ -127,7 +133,13 @@ impl Parser {
                     };
                     Ok(funct)
                 }
-                _ => Err(format!("Unexpected Token : {:?}", token.type_token)),
+                // TokenType::Semicolon => {
+                //     Ok(())
+                // }
+                _ => Err(format!(
+                    "Unexpected Token 'elements': {:?}",
+                    token.type_token
+                )),
             }
         } else {
             Err("Unexpected End of block! ".to_string())
