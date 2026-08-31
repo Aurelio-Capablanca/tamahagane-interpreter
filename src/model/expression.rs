@@ -88,6 +88,8 @@ pub enum Expression {
         primary_block: Box<Expression>,
         else_block: Option<Box<Expression>>,
     },
+    Block(Vec<Expression>),
+    None
 }
 
 impl Expression {

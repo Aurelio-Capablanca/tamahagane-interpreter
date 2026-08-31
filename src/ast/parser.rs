@@ -94,8 +94,11 @@ impl Parser {
                     }
                     self.advance();
                     println!("3rd advance 'Alloc': {:?}", self.current().unwrap());
-                    //self.make_expression().unwrap();
-                    self.consume_elements(Semicolon).unwrap();
+                    self.advance();
+                    println!("4th advance 'Alloc': {:?}", self.current().unwrap());
+                    let res = self.make_expression().unwrap();
+                    println!("here at 'Alloc': {:?}", self.current().unwrap());
+                    println!("res : {:?}", res);
                     Ok(Expression::Alloc {
                         name: name_alloc,
                         value: Box::new(Expression::Variable {
@@ -113,11 +116,13 @@ impl Parser {
                 }
                 TokenType::LCBracket => {
                     self.advance();
-                    let expression_curl_b = self.make_expression().unwrap();
-                    while self.current().as_ref().unwrap().type_token != TokenType::RCBracket {
-                        self.consume_elements(TokenType::RCBracket).unwrap();
-                    }                    
-                    Ok(expression_curl_b)
+                    let mut expression_curl_b: Vec<Expression> =
+                        Vec::from([self.make_expression().unwrap()]);
+                    while self.current().map(|t| t.type_token).unwrap() != TokenType::RCBracket {
+                        expression_curl_b.push(self.make_expression().unwrap());
+                    }
+                    self.consume_elements(TokenType::RCBracket).unwrap();
+                    Ok(Expression::Block(expression_curl_b))
                 }
                 TokenType::Lambda | TokenType::LambdaAssign => {
                     self.advance();
@@ -133,11 +138,15 @@ impl Parser {
                     };
                     Ok(funct)
                 }
-                // TokenType::Semicolon => {
-                //     Ok(())
+                // TokenType::Semicolon | TokenType::RCBracket | TokenType::EOF => {
+                //     self.advance();
+                //     self.current().unwrap().type_token;
+                //     let res = self.elements();
+                //     println!("res : {:?}",res.as_ref().unwrap());
+                //     res
                 // }
                 _ => Err(format!(
-                    "Unexpected Token 'elements': {:?}",
+                    "Unexpected Token at 'elements': {:?}",
                     token.type_token
                 )),
             }

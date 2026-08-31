@@ -48,7 +48,8 @@ fn main() {
         }
         lines = String::new();
     }*/
-    let string_start = "(&) => {
+    let string_start = 
+        "(&) => {
             alloc a = 604; 
             alloc b = 67 + 4;
         }";
