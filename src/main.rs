@@ -49,17 +49,21 @@ fn main() {
         lines = String::new();
     }*/
      let string_start = 
-         "{
+         "
             (&) => {
                 alloc a = 604; 
                 alloc b = 67 + 4;
             }
             
             (&) => {
-                alloc c = 9+7;             
-            }
-         }
-         ";     
+                alloc c = 9+(7^3);
+            }         
+            
+            
+         "; 
+     /*(&) => {
+                   alloc names = \"something said\";
+                 } */
         // "(&) => {
         //   ((2*5)+7)
         // }";         

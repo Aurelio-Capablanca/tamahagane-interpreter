@@ -113,25 +113,32 @@ impl Parser {
                     self.advance();
                     let expression_lambda = self.make_expression().unwrap();
                     let funct = match expression_lambda {
-                        Expression::Function { params, body, domain } => {
-                            Expression::Function {
-                                    params,
-                                    body,
-                                    domain,
+                        Expression::Block(mut val) => {
+                            while self.current().unwrap().type_token != TokenType::EOF {
+                                let next = self.make_expression().unwrap();
+                                val.push(next);
                             }
+                            Expression::Block(val)
                         }
-                        _=> {
-                            Expression::Function {
-                                    params: Vec::new(),
-                                    body: Box::new(expression_lambda),
-                                    domain: if let Some(get) = domain_definition::DOMAIN_DIC.get(0) {
-                                        get.clone()
-                                    } else {
-                                        Domain::empty()
-                                    },
-                            }
-                        }
-                    };                     
+                        Expression::Function {
+                            params,
+                            body,
+                            domain,
+                        } => Expression::Block(Vec::from([Expression::Function {
+                            params,
+                            body,
+                            domain,
+                        }])),
+                        _ => Expression::Function {
+                            params: Vec::new(),
+                            body: Box::new(expression_lambda),
+                            domain: if let Some(get) = domain_definition::DOMAIN_DIC.get(0) {
+                                get.clone()
+                            } else {
+                                Domain::empty()
+                            },
+                        },
+                    };
                     Ok(funct)
                 }
                 _ => Err(format!(

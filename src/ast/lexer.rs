@@ -109,7 +109,7 @@ pub mod lex_analisys {
             self.input.get(self.pos).copied()
         }
 
-        fn peek(&self, offset: usize) -> Option<u8> {
+        fn _peek(&self, offset: usize) -> Option<u8> {
             self.input.get(self.pos + offset).copied()
         }
 
@@ -127,7 +127,7 @@ pub mod lex_analisys {
             Some(current)
         }
 
-        fn advance_by(&mut self, n: usize) {
+        fn _advance_by(&mut self, n: usize) {
             self.pos += n.min(self.input.iter().len() - self.pos);
         }
 
@@ -411,6 +411,10 @@ pub mod lex_analisys {
                         column,
                     }
                 }
+                /*check here for String allocation! */
+                // Some(byte) if byte.is_ascii_punctuation() && byte == b'"' => {
+                //     let lexeme  = 
+                // }
                 Some(byte) if byte.is_ascii_digit() => {
                     let lexeme = self.consume_bites(|pred| pred.is_ascii_digit() || pred == b'.');
                     Token {
@@ -433,7 +437,7 @@ pub mod lex_analisys {
         }
         
         
-        // follow up!
+        // build the tokens
         pub fn tokenize(&mut self) -> Vec<Token> {
             let mut tokens: Vec<Token> = Vec::new();
             loop {
