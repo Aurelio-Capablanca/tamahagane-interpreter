@@ -93,6 +93,18 @@ pub enum Expression {
 }
 
 impl Expression {
+    
+    pub fn get_function_body(&self) -> &Expression {
+        match self {
+            Expression::Function { params, body, domain } => {
+                body.as_ref()
+            }
+            _=> {
+                panic!("No Body!")
+            }
+        }
+    }
+    
     pub fn as_numbers(&self) -> f64 {
         match self {
             Expression::Values(Value::Number(n, _)) => *n,

@@ -49,14 +49,23 @@ fn main() {
         lines = String::new();
     }*/
      let string_start = 
-         "(&) => {
-             alloc a = 604; 
-             alloc b = 67 + 4;
-         }";
-         
+         "{
+            (&) => {
+                alloc a = 604; 
+                alloc b = 67 + 4;
+            }
+            
+            (&) => {
+                alloc c = 9+7;             
+            }
+         }
+         ";     
+        // "(&) => {
+        //   ((2*5)+7)
+        // }";         
          //"(&) => {
-    //        6+6
-    //     }";        
+         // 6+6
+         //}";        
         //"alloc f = 0;";//"(&) => {5 + 5}";
         //"(&) => {78 + 7}";
     let mut lexer = Lexer::new(string_start);

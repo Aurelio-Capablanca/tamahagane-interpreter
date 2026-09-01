@@ -24,7 +24,7 @@ impl Parser {
         self.tokens.get(self.position)
     }
 
-    fn peek(&self, offset: usize) -> Option<&Token> {
+    fn _peek(&self, offset: usize) -> Option<&Token> {
         self.tokens.get(self.position + offset)
     }
 
@@ -70,32 +70,20 @@ impl Parser {
                     self.advance();
                     Ok(Expression::Values(Value::Boolean(false)))
                 }
-                TokenType::Alloc => {                    
-                    self.advance();                    
+                TokenType::Alloc => {
+                    self.advance();
                     let current_token = self.current();
                     let getter = current_token.unwrap();
                     let name_alloc = getter.lexeme.clone();
                     self.advance();
                     self.consume_elements(Eqs).unwrap();
-                    let mut val: Expression = Expression::None;
-                    if let Some(token) = self.current() {
-                        val = self.make_expression().unwrap();
-                        // println!("current value token : {:?}", token);
-                        // if token.type_token == TokenType::Number {
-                        //     val = match token.lexeme.parse() {
-                        //         Ok(cont) => Value::Number(cont, Some(10)),
-                        //         Err(_) => {
-                        //             panic!("no integer found!")
-                        //         }
-                        //     };
-                        // }
-                    }
+                    let val: Expression = self.make_expression().unwrap();
                     while self.current().unwrap().type_token != Semicolon {
                         self.advance();
-                    }      
+                    }
                     if self.current().unwrap().type_token == Semicolon {
                         self.consume_elements(Semicolon).unwrap();
-                    }                
+                    }
                     Ok(Expression::Alloc {
                         name: name_alloc,
                         value: Box::new(Expression::Variable {
@@ -124,24 +112,28 @@ impl Parser {
                 TokenType::Lambda | TokenType::LambdaAssign => {
                     self.advance();
                     let expression_lambda = self.make_expression().unwrap();
-                    let funct = Expression::Function {
-                        params: Vec::new(),
-                        body: Box::new(expression_lambda),
-                        domain: if let Some(get) = domain_definition::DOMAIN_DIC.get(0) {
-                            get.clone()
-                        } else {
-                            Domain::empty()
-                        },
-                    };
+                    let funct = match expression_lambda {
+                        Expression::Function { params, body, domain } => {
+                            Expression::Function {
+                                    params,
+                                    body,
+                                    domain,
+                            }
+                        }
+                        _=> {
+                            Expression::Function {
+                                    params: Vec::new(),
+                                    body: Box::new(expression_lambda),
+                                    domain: if let Some(get) = domain_definition::DOMAIN_DIC.get(0) {
+                                        get.clone()
+                                    } else {
+                                        Domain::empty()
+                                    },
+                            }
+                        }
+                    };                     
                     Ok(funct)
                 }
-                // TokenType::Semicolon | TokenType::RCBracket | TokenType::EOF => {
-                //     self.advance();
-                //     self.current().unwrap().type_token;
-                //     let res = self.elements();
-                //     println!("res : {:?}",res.as_ref().unwrap());
-                //     res
-                // }
                 _ => Err(format!(
                     "Unexpected Token at 'elements': {:?}",
                     token.type_token
