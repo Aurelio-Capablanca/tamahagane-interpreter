@@ -57,7 +57,7 @@ pub enum Value {
 pub enum Expression {
     Values(Value),    
     Variable{
-        val : Value,
+        val : Box<Expression>,
         operand: BOperator, 
         semicolon: TokenType
     },

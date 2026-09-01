@@ -70,39 +70,36 @@ impl Parser {
                     self.advance();
                     Ok(Expression::Values(Value::Boolean(false)))
                 }
-                TokenType::Alloc => {
-                    println!("no advance 'Alloc': {:?}", self.current().unwrap());
-                    self.advance();
-                    println!("1st advance 'Alloc': {:?}", self.current().unwrap());
+                TokenType::Alloc => {                    
+                    self.advance();                    
                     let current_token = self.current();
                     let getter = current_token.unwrap();
                     let name_alloc = getter.lexeme.clone();
                     self.advance();
-                    println!("2nd advance 'Alloc': {:?}", self.current().unwrap());
                     self.consume_elements(Eqs).unwrap();
-                    let mut val: Value = Value::Nones;
+                    let mut val: Expression = Expression::None;
                     if let Some(token) = self.current() {
-                        println!("current value token : {:?}", token);
-                        if token.type_token == TokenType::Number {
-                            val = match token.lexeme.parse() {
-                                Ok(cont) => Value::Number(cont, Some(10)),
-                                Err(_) => {
-                                    panic!("no integer found!")
-                                }
-                            };
-                        }
+                        val = self.make_expression().unwrap();
+                        // println!("current value token : {:?}", token);
+                        // if token.type_token == TokenType::Number {
+                        //     val = match token.lexeme.parse() {
+                        //         Ok(cont) => Value::Number(cont, Some(10)),
+                        //         Err(_) => {
+                        //             panic!("no integer found!")
+                        //         }
+                        //     };
+                        // }
                     }
-                    self.advance();
-                    println!("3rd advance 'Alloc': {:?}", self.current().unwrap());
-                    self.advance();
-                    println!("4th advance 'Alloc': {:?}", self.current().unwrap());
-                    let res = self.make_expression().unwrap();
-                    println!("here at 'Alloc': {:?}", self.current().unwrap());
-                    println!("res : {:?}", res);
+                    while self.current().unwrap().type_token != Semicolon {
+                        self.advance();
+                    }      
+                    if self.current().unwrap().type_token == Semicolon {
+                        self.consume_elements(Semicolon).unwrap();
+                    }                
                     Ok(Expression::Alloc {
                         name: name_alloc,
                         value: Box::new(Expression::Variable {
-                            val,
+                            val: Box::new(val),
                             operand: BOperator::Equals,
                             semicolon: Semicolon,
                         }),
