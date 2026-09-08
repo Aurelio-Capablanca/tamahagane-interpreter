@@ -1,4 +1,4 @@
-use crate::ast::{lexer::{lex_analisys::Lexer, token::Token}, parser::Parser};
+use crate::{ast::{lexer::{lex_analisys::Lexer, token::Token}, parser::Parser}, functions::maths::binary_operations::binary_arithmetics::sum_binary_b_nums};
 use crate::model::expression::Expression;
 
 /*
@@ -49,6 +49,12 @@ fn main() {
         }
         lines = String::new();
     }*/
+    
+    let apply = sum_binary_b_nums("1101", "101");
+    println!("{}",apply.0);
+    
+    
+    /*
      let string_start = 
          "
             (&) => {
@@ -61,18 +67,7 @@ fn main() {
             }         
             
             
-         "; 
-     /*(&) => {
-                   alloc names = \"something said\";
-                 } */
-        // "(&) => {
-        //   ((2*5)+7)
-        // }";         
-         //"(&) => {
-         // 6+6
-         //}";        
-        //"alloc f = 0;";//"(&) => {5 + 5}";
-        //"(&) => {78 + 7}";
+         ";      
     let mut lexer = Lexer::new(string_start);
     let tokens : Vec<Token> = lexer.tokenize();
     for token in &tokens {
@@ -95,6 +90,6 @@ fn main() {
         }
     };
     
-    
+    */
     
 }

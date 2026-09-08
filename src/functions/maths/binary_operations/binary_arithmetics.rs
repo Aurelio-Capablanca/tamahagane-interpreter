@@ -34,9 +34,19 @@ fn apply_sum_rule(a: char, b: char) -> &'static str {
     "_"
 }
 
+fn handle_carry (bit : &mut Vec<char>, prev_res : &str, i: usize) -> char {
+    let mut carry = '0';
+    if prev_res.len() > 2_usize {
+        let interm = prev_res.as_bytes()[1];
+        carry = interm as char;
+        let follow = apply_sum_rule(carry, bit[i + 1_usize]);
+        bit[i + 1_usize] = handle_carry(bit, follow, i);
+    }
+    carry
+}
+
 pub fn sum_binary_b_nums(input_a: &str, input_b: &str) -> (String /* S */, i32 /* Cout */) {
     let mut final_result : String = String::new();
-    let carry : &str = "";
     
     if input_a.len() > input_b.len() {
         return sum_binary_b_nums(input_b, input_a);
@@ -56,16 +66,12 @@ pub fn sum_binary_b_nums(input_a: &str, input_b: &str) -> (String /* S */, i32 /
                 }
             }
         } else {
-            val
+            final_result.push(*val);
+            continue;
         };
-        let current_eval = apply_sum_rule(*one, *val);
-        if current_eval.len() > 2_usize {
-            let interm = current_eval.as_bytes()[1];
-            carry = interm as char;
-            bit_t[i + 1_usize ] = apply_sum_rule(carry, bit_t[i + 1_usize]);
-        }
-        
-        final_result.push(*one);
+        let current = apply_sum_rule(*one, *val);
+        carry = handle_carry(&mut bit_t.clone(), current, i);        
+        final_result.push(carry);
     }
     
     (final_result, 0)
