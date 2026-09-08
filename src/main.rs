@@ -1,4 +1,5 @@
 use crate::ast::{lexer::{lex_analisys::Lexer, token::Token}, parser::Parser};
+use crate::model::expression::Expression;
 
 /*
 
@@ -82,12 +83,18 @@ fn main() {
     }
     let mut parser : Parser = Parser::new(tokens);
     let result = parser.parse();
-    match  result {
+    
+    let final_res = match  result {
         Ok(out) => {
-            println!("Exp : {:?}",out)
+            println!("Exp : {:?}",out);
+            out
         }
         Err(err) => {
-            eprintln!("outcome err : {}",err)
+            eprintln!("outcome err : {}",err);
+            Expression::None
         }
-    }
+    };
+    
+    
+    
 }
