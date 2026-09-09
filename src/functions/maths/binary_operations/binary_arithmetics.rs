@@ -17,62 +17,49 @@ over boolean operation:
 
 */
 
-fn apply_sum_rule(a: char, b: char) -> &'static str {
+fn apply_sum_rule(a: char, b: char) -> (char /*res */, char /* carry */) {
     if a.eq(&'0') && b.eq(&'0') {
-        return "0";
+        return ('0', '0');
     }
     if a.eq(&'0') && b.eq(&'1') {
-        return "0";
+        return ('1', '0');
     }
     if a.eq(&'1') && b.eq(&'0') {
-        return "1";
+        return ('1', '0');
     }
     if a.eq(&'1') && b.eq(&'1') {
-        return "10";
+        return ('0', '1');
     }
-    "_"
+    ('_', '_')
 }
 
 fn handle_carries(
     coll_b: &mut Vec<char>,
-    initial: &str,
+    res: &char,
+    carry: &char,
     p_index: usize,
-) -> (char /*carry */, char /*res */) /* carry , char  res )*/
-{
-    let mut res;
-    let mut carry = '0';
-    if initial.len() == 2_usize {
+) -> (char /*res */, char /*carry */) {
+    if res.eq(&'0') && carry.eq(&'1') {
         if (p_index + 1_usize) >= coll_b.len() {
-            return (initial.as_bytes()[0] as char, '0');
+            return (*res, *carry);
         }
         let b_pos = coll_b[p_index + 1_usize];
-        carry = initial.as_bytes()[0] as char;
-        res = initial.as_bytes()[1] as char;
-        let temp_next = apply_sum_rule(carry, b_pos);
+        let temp_next = apply_sum_rule(*carry, b_pos);
         println!(
-            "\nb = {}\ncarry = {} \ncarry sum : {} + {} = {}",
-            b_pos, carry, carry, b_pos, temp_next
+            "values :\nb_pos = {} \ncarry = {} \nnext_val = {} \nnext_carry = {}",
+            b_pos, carry, temp_next.0, temp_next.1
         );
-        
-        let (pos_z, pos_o) = if temp_next.len() == 2_usize {
-            // let eval = ;
-            // if eval.0.eq(&'1') && carry.eq(&'1') && b_pos.eq(&'1'){
-            //     res = eval.0;
-            // }
-            // eval
-            (temp_next.as_bytes()[0] as char, temp_next.as_bytes()[1] as char)
+        println!("Sum : {} + {} = {:?}", *carry, b_pos, temp_next);
+        let next_res = if b_pos.eq(&'1') && temp_next.1.eq(&'1') && carry.eq(&'1'){
+            println!("all condition met!");
+            temp_next.1
         } else {
-            (temp_next.as_bytes()[0] as char, '0')
+            temp_next.0
         };
-        
-        //let middle = handle_carries(coll_b, temp_next, p_index + 1_usize);
-        coll_b[p_index + 1] = pos_z;
-        //return middle_men;
-    } else {
-        res = initial.as_bytes()[0] as char;
-        //return ('0', res);
+        coll_b[p_index + 1] = next_res;//temp_next.0; 
+        println!("next coll_b value : {}", coll_b[p_index + 1]);
     }
-    (carry, res)
+    (*res, *carry)
 }
 
 pub fn sum_binary_b_nums(input_a: &str, input_b: &str) -> (String /* S */, i32 /* Cout */) {
@@ -103,22 +90,17 @@ pub fn sum_binary_b_nums(input_a: &str, input_b: &str) -> (String /* S */, i32 /
             }
         } else {
             println!("take down num : {}", val);
-            // let finale = apply_sum_rule(val, carry);
-            // final_result.push_str(finale);
-            final_result.push(val);
-            final_result.push(carry);
+            // final_result.push(val);
+            // final_result.push(carry);
             continue;
         };
 
         let current = apply_sum_rule(val, *one);
-        println!("{} + {} = {}", val, one, current);
-        let handler = handle_carries(&mut bit_t, current, i);
-        println!(
-            "result : {} | carry : {}\n______________",
-            handler.1, handler.0
-        );
-        carry = handler.0;
-        final_result.push(handler.1);
+        println!("{} + {} = {:?} |  carry = {}", val, one, current.0, current.1);
+        let handler = handle_carries(&mut bit_t, &current.0, &current.1, i);
+        println!("______________");
+        carry = handler.1;        
+        final_result.push(handler.0);
     }
 
     final_result = final_result.chars().rev().collect();
