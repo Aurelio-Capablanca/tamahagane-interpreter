@@ -38,10 +38,11 @@ fn handle_carries(coll_b: &mut Vec<char>, initial: &str, p_index: usize) -> char
     if initial.len() == 2_usize {
         let b_pos = coll_b[p_index];
         c_or_res = initial.as_bytes()[1] as char;
-        println!("carry sum : {} + {}", b_pos, c_or_res);
         let temp_next = apply_sum_rule(b_pos, c_or_res);
+        println!("carry sum : {} + {} = {}", b_pos, c_or_res, temp_next);
+        //println!("prev : {}", coll_b[p_index + 1]);
         coll_b[p_index + 1] = handle_carries(coll_b, temp_next, p_index + 1_usize);
-        println!("after : {}", coll_b[p_index + 1]);
+        //println!("after : {}", coll_b[p_index + 1]);
     } else {
         c_or_res = initial.as_bytes()[0] as char;
     }
@@ -60,11 +61,10 @@ pub fn sum_binary_b_nums(input_a: &str, input_b: &str) -> (String /* S */, i32 /
     let bit_o: Vec<char> = input_a.chars().rev().collect::<Vec<char>>();
     let mut bit_t: Vec<char> = input_b.chars().rev().collect::<Vec<char>>();
 
-    let iteration = bit_t.len() - 1_usize;
-
-    for i in 0..iteration {
+    for i in 0..bit_t.len() {
+        println!("at : {}",i);
         let val = bit_t[i];
-        let one = if i < bit_o.len() - 1 {
+        let one = if i < bit_o.len() {
             match bit_o.get(i) {
                 Some(val) => val,
                 None => {
@@ -83,9 +83,10 @@ pub fn sum_binary_b_nums(input_a: &str, input_b: &str) -> (String /* S */, i32 /
         let current = apply_sum_rule(val, *one);
         println!("{} + {} = {}", val, one, current);
         let handler = handle_carries(&mut bit_t, current, i);
-        println!(" Result {}", handler);
+        println!(" Result {}\n______________", handler);
         final_result.push(handler);
     }
+
     final_result = final_result.chars().rev().collect();
     (final_result, 0)
 }
