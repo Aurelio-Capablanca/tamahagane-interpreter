@@ -51,7 +51,10 @@ fn main() {
     }*/
     
     let apply = sum_binary_b_nums("1101", "101");
-    println!("{}",apply.0);
+    println!("{}\n*********************",apply.0);
+    
+    let sec = sum_binary_b_nums("1101", "111");
+    println!("{}\n*********************",sec.0);
     
     
     /*
