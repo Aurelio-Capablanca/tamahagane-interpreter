@@ -1,4 +1,4 @@
-use crate::ast::lexer::token::{Token, TokenType};
+use crate::model::token_types::TokenType;
 use crate::model::domains::domain_definition::Domain;
 use crate::model::expression::operators::*;
 
@@ -58,6 +58,7 @@ pub enum Expression {
     Values(Value),    
     Variable{
         val : Box<Expression>,
+        //type is missing still!
         operand: BOperator, 
         semicolon: TokenType
     },

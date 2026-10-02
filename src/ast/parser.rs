@@ -1,8 +1,7 @@
-use crate::ast::lexer::token::TokenType::{Eqs, Semicolon};
 use crate::model::domains::domain_definition::{self, Domain};
 use crate::model::expression::operators::*;
 use crate::{
-    ast::lexer::token::{Token, TokenType},
+    model::token_types::{TokenType, Token},
     model::expression::{Expression, Value},
 };
 
@@ -76,20 +75,20 @@ impl Parser {
                     let getter = current_token.unwrap();
                     let name_alloc = getter.lexeme.clone();
                     self.advance();
-                    self.consume_elements(Eqs).unwrap();
+                    self.consume_elements(TokenType::Eqs).unwrap();
                     let val: Expression = self.make_expression().unwrap();
-                    while self.current().unwrap().type_token != Semicolon {
+                    while self.current().unwrap().type_token != TokenType::Semicolon {
                         self.advance();
                     }
-                    if self.current().unwrap().type_token == Semicolon {
-                        self.consume_elements(Semicolon).unwrap();
+                    if self.current().unwrap().type_token == TokenType::Semicolon {
+                        self.consume_elements(TokenType::Semicolon).unwrap();
                     }
                     Ok(Expression::Alloc {
                         name: name_alloc,
                         value: Box::new(Expression::Variable {
                             val: Box::new(val),
                             operand: BOperator::Equals,
-                            semicolon: Semicolon,
+                            semicolon: TokenType::Semicolon,
                         }),
                     })
                 }

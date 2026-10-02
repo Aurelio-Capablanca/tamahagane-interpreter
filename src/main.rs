@@ -1,5 +1,5 @@
-use crate::{ast::{lexer::{lex_analisys::Lexer, token::Token}, parser::Parser}, functions::maths::binary_operations::binary_arithmetics::sum_binary_b_nums};
-use crate::model::expression::Expression;
+use crate::{ast::{lexer::lex_analisys::Lexer, parser::Parser}, functions::maths::binary_operations::binary_arithmetics::sum_binary_b_nums};
+use crate::model::{expression::Expression, token_types::Token};
 
 /*
 
@@ -56,8 +56,7 @@ fn main() {
     let sec = sum_binary_b_nums("1101", "111");
     println!("{}\n*********************",sec.0);
     
-    
-    /*
+
      let string_start = 
          "
             (&) => {
@@ -92,7 +91,7 @@ fn main() {
             Expression::None
         }
     };
-    
-    */
+    println!("{:?}",final_res);
+   
     
 }
