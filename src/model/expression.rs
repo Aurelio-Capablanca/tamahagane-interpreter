@@ -1,6 +1,6 @@
-use crate::model::token_types::TokenType;
 use crate::model::domains::domain_definition::Domain;
 use crate::model::expression::operators::*;
+use crate::model::token_types::TokenType;
 
 pub mod operators {
     #[derive(Debug, PartialEq, Clone)]
@@ -55,12 +55,12 @@ pub enum Value {
 
 #[derive(Debug, Clone)]
 pub enum Expression {
-    Values(Value),    
-    Variable{
-        val : Box<Expression>,
+    Values(Value),
+    Variable {
+        val: Box<Expression>,
         //type is missing still!
-        operand: BOperator, 
-        semicolon: TokenType
+        operand: BOperator,
+        semicolon: TokenType, /*only SemiColon applied! */
     },
     Binary {
         op: BOperator,
@@ -82,7 +82,7 @@ pub enum Expression {
     },
     Alloc {
         name: String,
-        value: Box<Expression>,        
+        value: Box<Expression>,
     },
     If {
         conditional: Box<Expression>,
@@ -90,22 +90,23 @@ pub enum Expression {
         else_block: Option<Box<Expression>>,
     },
     Block(Vec<Expression>),
-    None
+    None,
 }
 
 impl Expression {
-    
     pub fn get_function_body(&self) -> &Expression {
         match self {
-            Expression::Function { params, body, domain } => {
-                body.as_ref()
-            }
-            _=> {
+            Expression::Function {
+                params,
+                body,
+                domain,
+            } => body.as_ref(),
+            _ => {
                 panic!("No Body!")
             }
         }
     }
-    
+
     pub fn as_numbers(&self) -> f64 {
         match self {
             Expression::Values(Value::Number(n, _)) => *n,

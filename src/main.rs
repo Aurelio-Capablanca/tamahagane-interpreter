@@ -66,9 +66,9 @@ fn main() {
             
             (&) => {
                 alloc c = 9+(7^3);
+                alloc f = 2^9;
             }         
-            
-            
+                        
          ";      
     let mut lexer = Lexer::new(string_start);
     let tokens : Vec<Token> = lexer.tokenize();
@@ -81,17 +81,15 @@ fn main() {
     let mut parser : Parser = Parser::new(tokens);
     let result = parser.parse();
     
-    let final_res = match  result {
+    
+    let final_res : Expression = match  result {
         Ok(out) => {
-            println!("Exp : {:?}",out);
+            println!("\nExp : {:?}",out);
             out
         }
         Err(err) => {
-            eprintln!("outcome err : {}",err);
+            eprintln!("\noutcome err : {}",err);
             Expression::None
         }
     };
-    println!("{:?}",final_res);
-   
-    
 }
