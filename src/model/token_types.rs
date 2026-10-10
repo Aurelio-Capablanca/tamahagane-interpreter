@@ -6,6 +6,8 @@ pub enum TokenType {
     True,
     False,
     String,
+    Array,
+    D2Array,
 
     //non-identified!
     NoFeature,

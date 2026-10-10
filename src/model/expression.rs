@@ -43,8 +43,13 @@ pub mod operators {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
-    Number(f64 /*number*/, Option<i64> /*given base*/),
-    Boolean(bool),
+    SmallInteger(i8, Option<i64>),
+    Integer(i32 /*number*/, Option<i64> /*given base*/),
+    BigInteger(i64, Option<i64>),
+    Decimal(f32, Option<i64>),
+    BigDecimal(f64, Option<i64>),
+    Boolean(bool),  // simple boolean
+    String(String), //pure String association!
     Hex(String /*number*/, Option<i64> /*given base */),
     Symbol(String, /* power*/ f64),
     Algebraic(f64 /*coefix*/, &'static str /*symbol*/),
@@ -107,23 +112,23 @@ impl Expression {
         }
     }
 
-    pub fn as_numbers(&self) -> f64 {
+    pub fn as_numbers(&self) -> i32 {
         match self {
-            Expression::Values(Value::Number(n, _)) => *n,
+            Expression::Values(Value::Integer(n, _)) => *n,
             Expression::Values(Value::Boolean(b)) => {
                 if *b {
-                    1.0
+                    1
                 } else {
-                    0.0
+                    0
                 }
             }
-            _ => 0.0,
+            _ => 0,
         }
     }
 
     pub fn get_number_or_hex_base(&self) -> &i64 {
         match self {
-            Expression::Values(Value::Number(_, b)) => {
+            Expression::Values(Value::Integer(_, b)) => {
                 println!("You Reached a Number!!!");
                 b.as_ref().unwrap()
             }
@@ -141,7 +146,7 @@ impl Expression {
     pub fn to_numeric(&self) -> Expression {
         match self {
             Expression::Values(Value::Boolean(b)) => {
-                Expression::Values(Value::Number(if *b { 1.0 } else { 0.0 }, Some(10)))
+                Expression::Values(Value::Integer(if *b { 1 } else { 0 }, Some(10)))
             }
             _ => self.clone(),
         }
@@ -149,7 +154,7 @@ impl Expression {
 
     pub fn to_hex_string(&self) -> Expression {
         match self {
-            Expression::Values(Value::Number(n, b)) => {
+            Expression::Values(Value::Integer(n, b)) => {
                 Expression::Values(Value::Hex(n.to_string(), *b))
             }
             _ => self.clone(),
@@ -158,7 +163,7 @@ impl Expression {
 
     pub fn _as_boolean(&self) -> bool {
         match self {
-            Expression::Values(Value::Number(n, _)) => *n != 0.0,
+            Expression::Values(Value::Integer(n, _)) => *n != 0,
             Expression::Values(Value::Boolean(b)) => *b,
             _ => false,
         }
@@ -166,9 +171,7 @@ impl Expression {
 
     pub fn to_boolean(&self) -> Expression {
         match self {
-            Expression::Values(Value::Number(n, _)) => {
-                Expression::Values(Value::Boolean(*n != 0.0))
-            }
+            Expression::Values(Value::Integer(n, _)) => Expression::Values(Value::Boolean(*n != 0)),
             _ => self.clone(),
         }
     }

@@ -50,13 +50,13 @@ impl Parser {
                 TokenType::Number => {
                     let content = token.lexeme.clone();
                     self.advance();
-                    let number: f64 = match content.parse() {
+                    let number: i32 = match content.parse() {
                         Ok(n) => n,
                         Err(_) => {
                             panic!("Error parsing to Integer ! ")
                         }
                     };
-                    Ok(Expression::Values(Value::Number(number, Some(10))))
+                    Ok(Expression::Values(Value::Integer(number, Some(10))))
                 }
                 TokenType::True => {
                     self.advance();
