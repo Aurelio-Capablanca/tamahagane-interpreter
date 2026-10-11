@@ -1,13 +1,14 @@
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TokenType {
     //Values
     Number,
-    True,
-    False,
+    Decimal,
     String,
     Array,
     D2Array,
+    //static boolean values
+    True,
+    False,
 
     //non-identified!
     NoFeature,
@@ -49,9 +50,9 @@ pub enum TokenType {
 
     //own usage at Tamahagane!
     Apostrohe, // ' -- For Base declaration
-    
+
     //types
-    
+
     //end for file
     EOF,
 }
@@ -66,6 +67,11 @@ pub struct Token {
 
 impl Token {
     pub fn empty() -> Self {
-        Self { type_token: TokenType::EOF, lexeme: "".to_string(), line: 0, column: 0 }
+        Self {
+            type_token: TokenType::EOF,
+            lexeme: "".to_string(),
+            line: 0,
+            column: 0,
+        }
     }
 }

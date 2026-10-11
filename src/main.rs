@@ -1,4 +1,4 @@
-use crate::{ast::{lexer::lex_analisys::Lexer, parser::Parser}, functions::maths::binary_operations::binary_arithmetics::sum_binary_b_nums};
+use crate::{ast::{lexer::lex_analisys::Lexer, parser::Parser}, functions::maths::binary_operations::binary_arithmetics::sum_binary_b_nums, interpreter::interpreter_actions::general_actions};
 use crate::model::{expression::Expression, token_types::Token};
 
 /*
@@ -92,4 +92,6 @@ fn main() {
             Expression::None
         }
     };
+    println!("\n");
+    general_actions(&final_res);
 }

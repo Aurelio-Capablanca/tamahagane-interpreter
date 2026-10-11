@@ -58,6 +58,15 @@ pub enum Value {
     Nones,
 }
 
+impl Value {
+    pub fn get_integer(&self) -> Option<i32> {
+        match self {
+            Value::Integer(val, _) => Some(*val),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum Expression {
     Values(Value),
@@ -109,6 +118,16 @@ impl Expression {
             _ => {
                 panic!("No Body!")
             }
+        }
+    }
+
+    pub fn to_value(&self) -> &Value {
+        match self {
+            Expression::Values(val) => val,
+            _ => {
+                println!("Error finding value : {:?}",self);
+                panic!("Branch with no Value!")
+            },
         }
     }
 
