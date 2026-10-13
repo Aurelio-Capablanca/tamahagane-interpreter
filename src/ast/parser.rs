@@ -58,6 +58,11 @@ impl Parser {
                     };
                     Ok(Expression::Values(Value::Integer(number, Some(10))))
                 }
+                TokenType::String => {
+                    let content = token.lexeme.clone();
+                    self.advance();                    
+                    Ok(Expression::Values(Value::String(content)))
+                }
                 TokenType::True => {
                     self.advance();
                     Ok(Expression::Values(Value::Boolean(true)))

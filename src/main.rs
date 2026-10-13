@@ -1,47 +1,50 @@
-use crate::{ast::{lexer::lex_analisys::Lexer, parser::Parser}, functions::maths::binary_operations::binary_arithmetics::sum_binary_b_nums, interpreter::interpreter_actions::general_actions};
 use crate::model::{expression::Expression, token_types::Token};
+use crate::{
+    ast::{lexer::lex_analisys::Lexer, parser::Parser},
+    functions::maths::binary_operations::binary_arithmetics::sum_binary_b_nums,
+    interpreter::interpreter_actions::general_actions,
+};
 
 /*
 
--- Define models 
+-- Define models
 -- redefine AST working out
 -- improve console for cleaner input
 -- improve module definitions
 -- extend API internal behavior (stable)
  */
 mod ast;
+mod functions;
 mod interpreter;
 mod model;
-mod functions;
 
 /*
- modes:
- (1, arithmetics)
- (2, algebra) {
-  (2.1 factorization)
-  (2.2 algebraic operations)
-  (2.3 functions)  
- }
- (3, conversion base) {
-    special_char = _ (base of a number)
-    using as 100_b10 -> b_2 
- }
- (4, calculus)
- (5, physics)
- (6, chemistry)
- (7, boolean expressions)
- */
- 
- 
-fn main() {    
+modes:
+(1, arithmetics)
+(2, algebra) {
+ (2.1 factorization)
+ (2.2 algebraic operations)
+ (2.3 functions)
+}
+(3, conversion base) {
+   special_char = _ (base of a number)
+   using as 100_b10 -> b_2
+}
+(4, calculus)
+(5, physics)
+(6, chemistry)
+(7, boolean expressions)
+*/
+
+fn main() {
     //call to init console
     /*let mut lines = String::new();
     loop {
-        println!("hearing ....");        
+        println!("hearing ....");
         std::io::stdin().read_line(&mut lines).unwrap_or(0_usize);
         println!("passed in ! {:?}",lines);
         //
-        lines = String::new();        
+        lines = String::new();
         println!("Do you want to continue? [Y/n]");
         std::io::stdin().read_line(&mut lines).unwrap_or(0_usize);
         if !lines.trim().eq_ignore_ascii_case("y") {
@@ -49,49 +52,44 @@ fn main() {
         }
         lines = String::new();
     }*/
-    
-    let apply = sum_binary_b_nums("1101", "101");
-    println!("{}\n*********************",apply.0);
-    
-    let sec = sum_binary_b_nums("1101", "111");
-    println!("{}\n*********************",sec.0);
-    
 
-     let string_start = 
-         "
-            (&) => {
-                alloc a = 604; 
+    // let apply = sum_binary_b_nums("1101", "101");
+    // println!("{}\n*********************", apply.0);
+
+    // let sec = sum_binary_b_nums("1101", "111");
+    // println!("{}\n*********************", sec.0);
+
+    let string_start = "(&) => {
+                alloc a = 604;
                 alloc b = 67 + 4;
             }
-            
             (&) => {
                 alloc c = 9+(7^3);
                 alloc f = 2^9;
-            }         
-                        
-         ";      
+                alloc string_caller = 'some text inside two double quotes';
+            }";
     let mut lexer = Lexer::new(string_start);
-    let tokens : Vec<Token> = lexer.tokenize();
+    let tokens: Vec<Token> = lexer.tokenize();
     for token in &tokens {
         println!(
             "{:?} '{}' at {}:{}",
             token.type_token, token.lexeme, token.line, token.column
         );
     }
-    let mut parser : Parser = Parser::new(tokens);
+    let mut parser: Parser = Parser::new(tokens);
     let result = parser.parse();
-    
-    
-    let final_res : Expression = match  result {
+
+    let final_res: Expression = match result {
         Ok(out) => {
-            println!("\nExp : {:?}",out);
+            println!("\nExp : {:?}", out);
             out
         }
         Err(err) => {
-            eprintln!("\noutcome err : {}",err);
+            eprintln!("\noutcome err : {}", err);
             Expression::None
         }
     };
     println!("\n");
-    general_actions(&final_res);
+    let final_result = general_actions(&final_res);
+    println!("{:?}", final_result);
 }

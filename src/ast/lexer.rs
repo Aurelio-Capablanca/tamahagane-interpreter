@@ -1,10 +1,7 @@
-
-
 pub mod lex_analisys {
     use std::{collections::HashMap, sync::LazyLock};
 
     use crate::model::token_types::{Token, TokenType};
-    
 
     static RESERVED_KEYWORDS: LazyLock<HashMap<String, TokenType>> = LazyLock::new(|| {
         HashMap::from([
@@ -325,9 +322,9 @@ pub mod lex_analisys {
                             column,
                         }
                     }
-                }                
+                }
                 Some(byte) if byte.is_ascii_alphabetic() || byte == b'_' => {
-                    // keywords and identifiers
+                    println!("Under Identifiers ! ");
                     let lexeme =
                         self.consume_bites(|pred| pred.is_ascii_alphabetic() || pred == b'_');
                     let token_type = if let Some(keyword) = Self::is_keyword(lexeme) {
@@ -343,10 +340,21 @@ pub mod lex_analisys {
                         column,
                     }
                 }
-                /*check here for String allocation! */
-                // Some(byte) if byte.is_ascii_punctuation() && byte == b'"' => {
-                //     let lexeme  = 
-                // }
+                Some(byte) if byte == b'\'' && !byte.is_ascii_digit() => {
+                    println!("Under Strings ! ");
+                    let lexeme = self.consume_bites(|pred| {
+                        pred == b'\''
+                            || pred.is_ascii_alphanumeric()
+                            || pred.is_ascii_whitespace() && !byte.is_ascii_digit()
+                    });
+                    println!("Slice got: {}", lexeme);
+                    Token {
+                        type_token: TokenType::String,
+                        lexeme: lexeme.to_string(),
+                        line,
+                        column,
+                    }
+                }
                 Some(byte) if byte.is_ascii_digit() => {
                     let lexeme = self.consume_bites(|pred| pred.is_ascii_digit() || pred == b'.');
                     Token {
@@ -360,15 +368,14 @@ pub mod lex_analisys {
                     self.advance();
                     Token {
                         type_token: TokenType::NoFeature,
-                        lexeme: format!("UNKNOWN : {}", byte as char),
+                        lexeme: format!("UNKNOWN -> {}", byte as char),
                         line,
                         column,
                     }
                 }
             }
         }
-        
-        
+
         // build the tokens
         pub fn tokenize(&mut self) -> Vec<Token> {
             let mut tokens: Vec<Token> = Vec::new();
@@ -382,7 +389,5 @@ pub mod lex_analisys {
             }
             tokens
         }
-        
-        
     }
 }
